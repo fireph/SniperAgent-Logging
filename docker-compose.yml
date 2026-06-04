@@ -1,0 +1,20 @@
+services:
+  vector:
+    image: timberio/vector:latest-debian
+    volumes:
+      - ./vector/vector.toml:/etc/vector/vector.toml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data:/data
+    ports:
+      - "1514:1514/udp"
+    restart: unless-stopped
+
+  sniper:
+    image: dungfu/sniper-agent-logging:latest
+    build: .
+    volumes:
+      - ./data:/data
+    env_file: .env
+    depends_on:
+      - vector
+    restart: unless-stopped
