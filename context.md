@@ -11,6 +11,7 @@ Issues listed here will NOT trigger notifications.
 - Any error counter with value 0, null, false, or empty (e.g. "error": 0, "failed": 0, "errors": null) is not a real error
 - gunicorn.error logger messages are routine server lifecycle events, not real errors
 - Any error with websockets closing early or unexpectedly
+- "rss sync didn't cover the period between" is a routine gap in indexer RSS sync, not a real error
 
 ## Notes
 
