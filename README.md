@@ -9,6 +9,9 @@
     <a href="https://hub.docker.com/r/dungfu/sniper-agent-logging">
       <img src="https://img.shields.io/docker/stars/dungfu/sniper-agent-logging?style=flat-square&logo=docker" alt="Docker Stars">
     </a>
+    <a href="https://hub.docker.com/r/dungfu/sniper-agent-logging">
+      <img src="https://img.shields.io/docker/image-size/dungfu/sniper-agent-logging/latest?style=flat-square&logo=docker" alt="Image Size">
+    </a>
     <a href="https://github.com/fireph/SniperAgent-Logging/actions">
       <img src="https://img.shields.io/github/actions/workflow/status/fireph/SniperAgent-Logging/docker.yml?style=flat-square&logo=github&label=CI" alt="CI Status">
     </a>

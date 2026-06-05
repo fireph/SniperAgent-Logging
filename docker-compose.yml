@@ -1,6 +1,6 @@
 services:
   vector:
-    image: timberio/vector:latest-debian
+    image: timberio/vector:latest-alpine
     user: "568:568"
     group_add:
       - "999"
