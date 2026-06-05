@@ -1,15 +1,26 @@
 import json
+import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastmcp import FastMCP
+from fastmcp.server.lifespan import lifespan as _lifespan
 from openai import AsyncOpenAI
 
 from sniper.config import Config
 from sniper.context import load_context
 from sniper.notifier import SEVERITY_PRIORITY, send_gotify
 
-mcp = FastMCP("sniper-agent")
+mcp_ready = threading.Event()
+
+
+@_lifespan
+async def _server_lifespan(server):
+    mcp_ready.set()
+    yield
+
+
+mcp = FastMCP("sniper-agent", lifespan=_server_lifespan)
 
 SYSTEM_PROMPT = """You are a log analysis agent. Given log entries and context, identify issues that require attention.
 

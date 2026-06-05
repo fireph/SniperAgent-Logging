@@ -2,7 +2,7 @@ import asyncio
 import logging
 import threading
 
-from sniper.agent import mcp, run_scan
+from sniper.agent import mcp, mcp_ready, run_scan
 from sniper.config import Config
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -13,6 +13,8 @@ def _scheduler_loop():
     cfg = Config.from_env()
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+    log.info("Waiting for MCP server to start before running first scan")
+    mcp_ready.wait()
     while True:
         try:
             log.info("Running scheduled log scan")
