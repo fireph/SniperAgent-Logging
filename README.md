@@ -4,13 +4,10 @@
   <p>Automated log analysis — Docker + PFsense → LLM → Gotify</p>
   <p>
     <a href="https://hub.docker.com/r/dungfu/sniper-agent-logging">
-      <img src="https://img.shields.io/docker/pulls/dungfu/sniper-agent-logging?style=flat-square&logo=docker&color=0db7ed" alt="Docker Pulls">
+      <img src="https://img.shields.io/docker/pulls/dungfu/sniper-agent-logging?style=flat-square&logo=docker" alt="Docker Pulls">
     </a>
     <a href="https://hub.docker.com/r/dungfu/sniper-agent-logging">
-      <img src="https://img.shields.io/docker/stars/dungfu/sniper-agent-logging?style=flat-square&logo=docker&color=0db7ed" alt="Docker Stars">
-    </a>
-    <a href="https://hub.docker.com/r/dungfu/sniper-agent-logging">
-      <img src="https://img.shields.io/docker/v/dungfu/sniper-agent-logging?style=flat-square&logo=docker&color=0db7ed&label=latest" alt="Docker Image Version">
+      <img src="https://img.shields.io/docker/stars/dungfu/sniper-agent-logging?style=flat-square&logo=docker" alt="Docker Stars">
     </a>
     <a href="https://github.com/fireph/SniperAgent-Logging/actions">
       <img src="https://img.shields.io/github/actions/workflow/status/fireph/SniperAgent-Logging/docker.yml?style=flat-square&logo=github&label=CI" alt="CI Status">
