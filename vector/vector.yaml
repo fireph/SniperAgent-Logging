@@ -35,7 +35,7 @@ transforms:
       - tag_source
     condition: |
       msg = string(.message) ?? ""
-      .log_source == "pfsense" || (.log_source == "docker" && !starts_with(msg, "[INFO]") && !starts_with(msg, "[DEBUG]") && match(msg, r'(?i)\berror\b|\berr\b|\bwarn\b|\bfailed\b|\bcritical\b|\bfatal\b|\bpanic\b|\bexception\b|\brefused\b|\btimeout\b|\bdenied\b|\bunauthorized\b|\bunreachable\b|\bcorrupt\b|\bsegfault\b|\boom\b|\bkilled\b'))
+      .log_source == "pfsense" || (.log_source == "docker" && !starts_with(msg, "[INFO]") && !starts_with(msg, "[DEBUG]") && match(msg, r'(?i)\berror\b|\berr\b|\bwarn\b|\bfailed\b|\bcritical\b|\bfatal\b|\bpanic\b|\bexception\b|\brefused\b|\btimeout\b|\bdenied\b|\bunauthorized\b|\bunreachable\b|\bcorrupt\b|\bsegfault\b|\boom\b|\bkilled\b|\baborted\b|\bcrash\b|\bdeadlock\b|\boverflow\b|\bexpired\b|\binvalid\b|\bmismatch\b|\bstalled\b'))
 
 sinks:
   log_file:
