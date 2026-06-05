@@ -129,7 +129,7 @@ docker compose up -d
 | `LLM_MODEL` | `syn:small:text` | Model name to use |
 | `GOTIFY_URL` | (required) | Gotify server URL |
 | `GOTIFY_TOKEN` | (required) | Gotify app token |
-| `SCAN_INTERVAL_HOURS` | `6` | Hours between automated scans |
+| `SCAN_INTERVAL` | `6h` | Time between scans (e.g. `6h`, `1d12h`, `30m`, or seconds as bare number) |
 | `LOG_DIR` | `/data/logs` | Path to JSONL log files |
 | `CONTEXT_FILE` | `/data/context.md` | Path to context markdown |
 | `LAST_SCAN_FILE` | `/data/.last_scan` | Timestamp of last scan |
