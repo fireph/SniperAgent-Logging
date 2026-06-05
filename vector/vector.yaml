@@ -16,7 +16,8 @@ transforms:
     source: |
       if exists(.container_name) {
         .log_source = "docker"
-        .container_name = if exists(.label."com.docker.compose.project") { replace(.label."com.docker.compose.project", r'^ix-', '') } else { .container_name }
+        project = if exists(.label."com.docker.compose.project") { .label."com.docker.compose.project" } else { .container_name }
+        .container_name = replace!(project, r'^ix-', "")
       } else {
         .log_source = "pfsense"
       }
