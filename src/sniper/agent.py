@@ -162,7 +162,7 @@ def _log_notif_history(path: str, issue: dict, sent: bool, timestamp: str):
 async def _notify_issues(cfg: Config, analysis: dict):
     sev_order = ["info", "low", "medium", "high", "urgent"]
     min_idx = sev_order.index(cfg.min_severity) if cfg.min_severity in sev_order else 0
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M %Z").strip()
     for issue in analysis.get("issues", []):
         sev = issue.get("severity", "info")
         sev_idx = sev_order.index(sev) if sev in sev_order else 0
