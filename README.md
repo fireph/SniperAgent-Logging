@@ -25,10 +25,10 @@ Automated log analysis agent that monitors Docker container logs and PFsense sys
 ## How It Works
 
 ```
- PFsense ──── UDP :1514 ────┐
-                              ├──► Vector ──► /data/logs/*.jsonl
- Docker containers ── socket ┘                    │
-                                                  ▼
+ PFsense ──── UDP :1514 ─────┐
+                             ├──► Vector ──► /data/logs/*.jsonl
+ Docker containers ── socket ┘                │
+                                              ▼
                                          Sniper Agent
                                               │
                                    ┌──────────┼──────────┐
