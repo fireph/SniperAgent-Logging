@@ -78,6 +78,10 @@ The file is mounted from the persistent data volume, so edits persist across con
 - PFsense is the edge firewall/gateway
 ```
 
+## Notification History
+
+Every issue the LLM identifies is logged to `/data/notif_history.md` (configurable via `NOTIF_HISTORY_FILE`), including ones filtered out by `MIN_SEVERITY`. Each entry shows whether it was **SENT** to Gotify or **FILTERED**, along with the severity, source, description, and log excerpt. This gives you a full audit trail of everything the agent detected, even if you only want high-severity Gotify pushes.
+
 ## MCP Tools
 
 The agent exposes a FastMCP server internally on `127.0.0.1:8080` (not exposed to the host):
