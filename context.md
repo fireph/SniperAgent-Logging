@@ -12,6 +12,7 @@ Issues listed here will NOT trigger notifications.
 - gunicorn.error logger messages are routine server lifecycle events, not real errors
 - Any error with websockets closing early or unexpectedly
 - "rss sync didn't cover the period between" is a routine gap in indexer RSS sync, not a real error
+- TMDB/TVDB errors (e.g. "Error in TheMovieDb", "TheTVDB") are transient external service issues, not local problems
 
 ## Notes
 
