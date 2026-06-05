@@ -33,10 +33,10 @@ Automated log analysis agent that monitors Docker container logs and PFsense sys
                                               │
                                    ┌──────────┼──────────┐
                                    │          │          │
-                              reads logs  reads context  sends alerts
+                           reads logs   reads context   sends alerts
                                    │          │          │
                                    ▼          ▼          ▼
-                              LLM analysis  context.md  Gotify
+                         LLM analysis     context.md    Gotify
 ```
 
 1. **Vector** collects logs from Docker (via socket) and PFsense (via UDP syslog on port 1514), tags the source, and writes daily JSONL files to `/data/logs/`
