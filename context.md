@@ -1,10 +1,8 @@
 # Sniper Context
 
-Context the agent should consider when analyzing logs.
-
 ## Ignore
 
-Issues listed here will NOT trigger notifications. Add one entry per line:
+Issues listed here will NOT trigger notifications.
 
 - tdarr-server -- "Exit approved. Closing process." is a normal Tdarr shutdown
 - authentik-server -- "Error while closing socket [Errno 9] Bad file descriptor" is harmless cleanup during shutdown
@@ -15,8 +13,6 @@ Issues listed here will NOT trigger notifications. Add one entry per line:
 - Any error with websockets closing early or unexpectedly
 
 ## Notes
-
-Environment details that help the agent understand what's normal:
 
 - Home lab runs on TrueNAS Scale
 - Docker host is the same machine as the log collector
