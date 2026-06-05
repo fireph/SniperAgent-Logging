@@ -129,6 +129,8 @@ docker compose up -d
 | `LOG_DIR` | `/data/logs` | Path to JSONL log files |
 | `CONTEXT_FILE` | `/data/context.md` | Path to context markdown |
 | `LAST_SCAN_FILE` | `/data/.last_scan` | Timestamp of last scan |
+| `NOTIF_HISTORY_FILE` | `/data/notif_history.md` | Path to notification history log (all issues, including filtered) |
+| `MIN_SEVERITY` | `info` | Minimum severity to log to Gotify (info/low/medium/high/urgent) |
 
 ### CI/CD
 

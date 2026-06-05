@@ -137,13 +137,39 @@ async def _analyze(cfg: Config) -> dict:
         return {"issues": [], "summary": "Failed to parse LLM response."}
 
 
+def _log_notif_history(path: str, issue: dict, sent: bool, timestamp: str):
+    p = Path(path)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    sev = issue.get("severity", "info")
+    title = issue.get("title", "Issue detected")
+    source = issue.get("source", "unknown")
+    description = issue.get("description", "")
+    log_excerpt = issue.get("log_excerpt", "")
+    status = "SENT" if sent else "FILTERED"
+    entry = (
+        f"\n---\n\n"
+        f"## [{sev.upper()}] {title} — {status}\n\n"
+        f"- **Time:** {timestamp}\n"
+        f"- **Source:** {source}\n"
+        f"- **Status:** {status}\n\n"
+        f"{description}\n\n"
+        f"**Log:**\n```\n{log_excerpt}\n```\n"
+    )
+    with p.open("a", encoding="utf-8") as f:
+        f.write(entry)
+
+
 async def _notify_issues(cfg: Config, analysis: dict):
     sev_order = ["info", "low", "medium", "high", "urgent"]
     min_idx = sev_order.index(cfg.min_severity) if cfg.min_severity in sev_order else 0
+    timestamp = datetime.now(timezone.utc).isoformat()
     for issue in analysis.get("issues", []):
         sev = issue.get("severity", "info")
-        if sev_order.index(sev) if sev in sev_order else 0 < min_idx:
+        sev_idx = sev_order.index(sev) if sev in sev_order else 0
+        if sev_idx < min_idx:
+            _log_notif_history(cfg.notif_history_file, issue, sent=False, timestamp=timestamp)
             continue
+        _log_notif_history(cfg.notif_history_file, issue, sent=True, timestamp=timestamp)
         priority = SEVERITY_PRIORITY.get(sev, 1)
         await send_gotify(
             cfg.gotify_url,

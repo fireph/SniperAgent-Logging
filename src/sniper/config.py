@@ -13,6 +13,7 @@ class Config:
     context_file: str = "/data/context.md"
     scan_interval_hours: int = 6
     last_scan_file: str = "/data/.last_scan"
+    notif_history_file: str = "/data/notif_history.md"
     min_severity: str = "info"
 
     @classmethod
@@ -27,5 +28,6 @@ class Config:
             context_file=os.getenv("CONTEXT_FILE", "/data/context.md"),
             scan_interval_hours=int(os.getenv("SCAN_INTERVAL_HOURS", "6")),
             last_scan_file=os.getenv("LAST_SCAN_FILE", "/data/.last_scan"),
+            notif_history_file=os.getenv("NOTIF_HISTORY_FILE", "/data/notif_history.md"),
             min_severity=os.getenv("MIN_SEVERITY", "info").lower(),
         )
