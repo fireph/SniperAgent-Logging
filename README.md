@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="logo.svg" alt="Sniper Agent" width="120">
+  <img src="logo.svg" alt="Sniper Agent" width="200">
   <h1>SniperAgent-Logging</h1>
   <p>Automated log analysis — Docker + PFsense → LLM → Gotify</p>
   <p>
