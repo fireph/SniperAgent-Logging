@@ -14,17 +14,34 @@ transforms:
       - docker_logs
       - pfsense_syslog
     source: |
-      if .source_type == "docker" {
+      if exists(.container_name) {
         .log_source = "docker"
       } else {
         .log_source = "pfsense"
       }
+      . = {
+        "timestamp": .timestamp,
+        "log_source": .log_source,
+        "message": .message,
+        "container_name": .container_name,
+        "stream": .stream,
+        "host": .host,
+        "source_type": .source_type
+      }
+
+  filter_noise:
+    type: filter
+    inputs:
+      - tag_source
+    condition: |
+      msg = string(.message) ?? ""
+      .log_source == "pfsense" || (.log_source == "docker" && !starts_with(msg, "[INFO]") && !starts_with(msg, "[DEBUG]") && match(msg, r'(?i)\berror\b|\berr\b|\bwarn\b|\bfailed\b|\bcritical\b|\bfatal\b|\bpanic\b|\bexception\b|\brefused\b|\btimeout\b|\bdenied\b|\bunauthorized\b|\bunreachable\b|\bcorrupt\b|\bsegfault\b|\boom\b|\bkilled\b'))
 
 sinks:
   log_file:
     type: file
     inputs:
-      - tag_source
+      - filter_noise
     path: "/data/logs/sniper-%Y-%m-%d.jsonl"
     encoding:
       codec: json

@@ -3,7 +3,7 @@ services:
     image: timberio/vector:latest-debian
     user: "568:568"
     group_add:
-      - docker
+      - "999"
     volumes:
       - ./vector/vector.yaml:/etc/vector/vector.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
