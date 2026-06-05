@@ -127,8 +127,12 @@ async def _analyze(cfg: Config) -> dict:
 
 
 async def _notify_issues(cfg: Config, analysis: dict):
+    sev_order = ["info", "low", "medium", "high", "urgent"]
+    min_idx = sev_order.index(cfg.min_severity) if cfg.min_severity in sev_order else 0
     for issue in analysis.get("issues", []):
         sev = issue.get("severity", "info")
+        if sev_order.index(sev) if sev in sev_order else 0 < min_idx:
+            continue
         priority = SEVERITY_PRIORITY.get(sev, 1)
         await send_gotify(
             cfg.gotify_url,

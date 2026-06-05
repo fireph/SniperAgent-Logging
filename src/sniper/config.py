@@ -13,6 +13,7 @@ class Config:
     context_file: str = "/data/context.md"
     scan_interval_hours: int = 12
     last_scan_file: str = "/data/.last_scan"
+    min_severity: str = "info"
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -26,4 +27,5 @@ class Config:
             context_file=os.getenv("CONTEXT_FILE", "/data/context.md"),
             scan_interval_hours=int(os.getenv("SCAN_INTERVAL_HOURS", "12")),
             last_scan_file=os.getenv("LAST_SCAN_FILE", "/data/.last_scan"),
+            min_severity=os.getenv("MIN_SEVERITY", "info").lower(),
         )
