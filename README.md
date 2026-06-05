@@ -1,22 +1,42 @@
-# SniperAgent-Logging
+<div align="center">
+  <img src="logo.svg" alt="Sniper Agent" width="120">
+  <h1>SniperAgent-Logging</h1>
+  <p>Automated log analysis — Docker + PFsense → LLM → Gotify</p>
+  <p>
+    <a href="https://hub.docker.com/r/dungfu/sniper-agent-logging">
+      <img src="https://img.shields.io/docker/pulls/dungfu/sniper-agent-logging?style=flat-square&logo=docker&color=0db7ed" alt="Docker Pulls">
+    </a>
+    <a href="https://hub.docker.com/r/dungfu/sniper-agent-logging">
+      <img src="https://img.shields.io/docker/stars/dungfu/sniper-agent-logging?style=flat-square&logo=docker&color=0db7ed" alt="Docker Stars">
+    </a>
+    <a href="https://hub.docker.com/r/dungfu/sniper-agent-logging">
+      <img src="https://img.shields.io/docker/v/dungfu/sniper-agent-logging?style=flat-square&logo=docker&color=0db7ed&label=latest" alt="Docker Image Version">
+    </a>
+    <a href="https://github.com/fireph/SniperAgent-Logging/actions">
+      <img src="https://img.shields.io/github/actions/workflow/status/fireph/SniperAgent-Logging/docker.yml?style=flat-square&logo=github&label=CI" alt="CI Status">
+    </a>
+  </p>
+</div>
+
+---
 
 Automated log analysis agent that monitors Docker container logs and PFsense syslog, uses an LLM to identify issues worth acting on, and pushes alerts to Gotify with severity-based priority.
 
 ## How It Works
 
 ```
-PFsense (syslog) ──► UDP :1514 ──┐
-                                   ├─► Vector ──► /data/logs/*.jsonl
-Docker containers ──► socket ──┘                        │
-                                                       ▼
-                                              Sniper Agent
-                                                   │
-                                        ┌──────────┼──────────┐
-                                        │          │          │
-                                   reads logs  reads context  sends alerts
-                                        │          │          │
-                                        ▼          ▼          ▼
-                                   LLM analysis  context.md  Gotify
+ PFsense ──── UDP :1514 ────┐
+                              ├──► Vector ──► /data/logs/*.jsonl
+ Docker containers ── socket ┘                    │
+                                                  ▼
+                                         Sniper Agent
+                                              │
+                                   ┌──────────┼──────────┐
+                                   │          │          │
+                              reads logs  reads context  sends alerts
+                                   │          │          │
+                                   ▼          ▼          ▼
+                              LLM analysis  context.md  Gotify
 ```
 
 1. **Vector** collects logs from Docker (via socket) and PFsense (via UDP syslog on port 1514), tags the source, and writes daily JSONL files to `/data/logs/`
@@ -100,9 +120,9 @@ docker compose up -d
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `LLM_BASE_URL` | `https://synthetic.new/v1` | LLM API base URL |
+| `LLM_BASE_URL` | `https://api.synthetic.new/openai/v1` | LLM API base URL |
 | `LLM_API_KEY` | (required) | API key for the LLM provider |
-| `LLM_MODEL` | `default` | Model name to use |
+| `LLM_MODEL` | `syn:small:text` | Model name to use |
 | `GOTIFY_URL` | (required) | Gotify server URL |
 | `GOTIFY_TOKEN` | (required) | Gotify app token |
 | `SCAN_INTERVAL_HOURS` | `12` | Hours between automated scans |
@@ -112,7 +132,7 @@ docker compose up -d
 
 ### CI/CD
 
-Pushes to `main` automatically build and push `dungfu/sniper-agent:latest` to DockerHub via GitHub Actions. Set these repository secrets:
+Pushes to `main` automatically build and push `dungfu/sniper-agent-logging:latest` to DockerHub via GitHub Actions. Set these repository secrets:
 
 - `DOCKERHUB_USERNAME`
 - `DOCKERHUB_TOKEN`
@@ -127,7 +147,7 @@ Pushes to `main` automatically build and push `dungfu/sniper-agent:latest` to Do
 ├── Dockerfile                     Python 3.14, fastmcp/openai/httpx
 ├── pyproject.toml                 Project metadata & dependencies
 ├── vector/
-│   └── vector.toml                Vector config: Docker + PFsense -> JSONL
+│   └── vector.yaml                Vector config: Docker + PFsense -> JSONL
 └── src/sniper/
     ├── __init__.py
     ├── main.py                    Entry point: scheduler + MCP server
