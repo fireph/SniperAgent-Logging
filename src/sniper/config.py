@@ -25,7 +25,7 @@ class Config:
             gotify_token=os.getenv("GOTIFY_TOKEN", ""),
             log_dir=os.getenv("LOG_DIR", "/data/logs"),
             context_file=os.getenv("CONTEXT_FILE", "/data/context.md"),
-            scan_interval_hours=int(os.getenv("SCAN_INTERVAL_HOURS", "12")),
+            scan_interval_hours=int(os.getenv("SCAN_INTERVAL_HOURS", "6")),
             last_scan_file=os.getenv("LAST_SCAN_FILE", "/data/.last_scan"),
             min_severity=os.getenv("MIN_SEVERITY", "info").lower(),
         )
