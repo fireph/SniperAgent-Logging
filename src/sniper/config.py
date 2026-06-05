@@ -6,7 +6,7 @@ import os
 class Config:
     llm_base_url: str = ""
     llm_api_key: str = ""
-    llm_model: str = "default"
+    llm_model: str = "syn:small:text"
     gotify_url: str = ""
     gotify_token: str = ""
     log_dir: str = "/data/logs"
@@ -17,9 +17,9 @@ class Config:
     @classmethod
     def from_env(cls) -> "Config":
         return cls(
-            llm_base_url=os.getenv("LLM_BASE_URL", "https://synthetic.new/v1"),
+            llm_base_url=os.getenv("LLM_BASE_URL", "https://api.synthetic.new/openai/v1"),
             llm_api_key=os.getenv("LLM_API_KEY", ""),
-            llm_model=os.getenv("LLM_MODEL", "default"),
+            llm_model=os.getenv("LLM_MODEL", "syn:small:text"),
             gotify_url=os.getenv("GOTIFY_URL", ""),
             gotify_token=os.getenv("GOTIFY_TOKEN", ""),
             log_dir=os.getenv("LOG_DIR", "/data/logs"),
