@@ -11,7 +11,7 @@ class Config:
     gotify_token: str = ""
     log_dir: str = "/data/logs"
     context_file: str = "/data/context.md"
-    scan_interval_hours: int = 12
+    scan_interval_hours: int = 6
     last_scan_file: str = "/data/.last_scan"
     min_severity: str = "info"
 
