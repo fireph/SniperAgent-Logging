@@ -31,19 +31,21 @@ transforms:
         "source_type": .source_type
       }
 
-  filter_noise:
-    type: filter
+  filter_window:
+    type: window
     inputs:
       - tag_source
-    condition: |
-      msg = string(.message) ?? ""
-      .log_source == "pfsense" || (.log_source == "docker" && !starts_with(msg, "[INFO]") && !starts_with(msg, "[DEBUG]") && match(msg, r'(?i)\berror\b|\berr\b|\bwarn\b|\bfailed\b|\bcritical\b|\bfatal\b|\bpanic\b|\bexception\b|\brefused\b|\btimeout\b|\bdenied\b|\bunauthorized\b|\bunreachable\b|\bcorrupt\b|\bsegfault\b|\boom\b|\bkilled\b|\baborted\b|\bcrash\b|\bdeadlock\b|\boverflow\b|\bexpired\b|\binvalid\b|\bmismatch\b|\bstalled\b'))
+    flush_when: |
+      .log_source == "pfsense" || (.log_source == "docker" && match(string(.message) ?? "", r'(?i)\berror\b|\berr\b|\bwarn\b|\bfailed\b|\bcritical\b|\bfatal\b|\bpanic\b|\bexception\b|\brefused\b|\btimeout\b|\bdenied\b|\bunauthorized\b|\bunreachable\b|\bcorrupt\b|\bsegfault\b|\boom\b|\bkilled\b|\baborted\b|\bcrash\b|\bdeadlock\b|\boverflow\b|\bexpired\b|\binvalid\b|\bmismatch\b|\bstalled\b'))
+    forward_when: .log_source == "pfsense"
+    num_events_before: 5
+    num_events_after: 5
 
 sinks:
   log_file:
     type: file
     inputs:
-      - filter_noise
+      - filter_window
     path: "/data/logs/sniper-%Y-%m-%d.jsonl"
     encoding:
       codec: json
