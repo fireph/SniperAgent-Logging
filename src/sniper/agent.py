@@ -132,6 +132,7 @@ def _chunk_logs(lines: list[str], budget: int, encoding_name: str = "cl100k_base
 
 async def _call_llm(client: AsyncOpenAI, cfg: Config, context_md: str, start: str, end: str, chunk: list[str]) -> dict:
     logs_str = "\n".join(chunk)
+    logger.info(f"Calling LLM ({len(chunk)} lines)...")
     resp = await client.chat.completions.create(
         model=cfg.llm_model,
         messages=[
