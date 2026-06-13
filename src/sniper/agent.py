@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import threading
@@ -111,18 +112,62 @@ def _count_tokens(text: str, encoding_name: str = "cl100k_base") -> int:
     return len(enc.encode(text))
 
 
-def _trim_logs_to_budget(lines: list[str], budget: int, encoding_name: str = "cl100k_base") -> str:
+def _chunk_logs(lines: list[str], budget: int, encoding_name: str = "cl100k_base") -> list[list[str]]:
     enc = tiktoken.get_encoding(encoding_name)
-    kept = []
+    chunks: list[list[str]] = []
+    current: list[str] = []
     remaining = budget
-    for line in reversed(lines):
+    for line in lines:
         toks = len(enc.encode(line))
-        if toks > remaining:
-            break
+        if current and toks > remaining:
+            chunks.append(current)
+            current = []
+            remaining = budget
+        current.append(line)
         remaining -= toks
-        kept.append(line)
-    kept.reverse()
-    return "\n".join(kept)
+    if current:
+        chunks.append(current)
+    return chunks
+
+
+async def _call_llm(client: AsyncOpenAI, cfg: Config, context_md: str, start: str, end: str, chunk: list[str]) -> dict:
+    logs_str = "\n".join(chunk)
+    resp = await client.chat.completions.create(
+        model=cfg.llm_model,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": USER_TEMPLATE.format(
+                    context=context_md,
+                    start=start,
+                    end=end,
+                    logs=logs_str,
+                ),
+            },
+        ],
+        response_format={"type": "json_object"},
+    )
+    try:
+        return json.loads(resp.choices[0].message.content)
+    except json.JSONDecodeError:
+        return {"issues": [], "summary": "Failed to parse LLM response."}
+
+
+def _merge_analyses(analyses: list[dict]) -> dict:
+    all_issues: list[dict] = []
+    for a in analyses:
+        all_issues.extend(a.get("issues", []))
+    seen: set[str] = set()
+    deduped: list[dict] = []
+    for issue in all_issues:
+        key = f"{issue.get('source', '')}|{issue.get('title', '')}"
+        if key not in seen:
+            seen.add(key)
+            deduped.append(issue)
+    summaries = [a.get("summary", "") for a in analyses if a.get("summary")]
+    combined = "; ".join(summaries) if summaries else "Scan complete."
+    return {"issues": deduped, "summary": combined}
 
 
 async def _analyze(cfg: Config) -> dict:
@@ -146,34 +191,21 @@ async def _analyze(cfg: Config) -> dict:
     overhead_tokens = system_tokens + _count_tokens(user_overhead)
     logs_budget = max(0, MAX_CONTEXT_TOKENS - overhead_tokens)
 
-    logs_str = _trim_logs_to_budget(logs, logs_budget)
-    actual_tokens = system_tokens + _count_tokens(user_overhead) + _count_tokens(logs_str)
-    logger.info(f"Prompt tokens: {actual_tokens} (budget: {MAX_CONTEXT_TOKENS}, logs budget: {logs_budget})")
+    chunks = _chunk_logs(logs, logs_budget)
+    logger.info(f"Split logs into {len(chunks)} chunk(s) ({len(logs)} lines, budget: {logs_budget} tokens/chunk)")
 
     client = AsyncOpenAI(base_url=cfg.llm_base_url, api_key=cfg.llm_api_key)
-    resp = await client.chat.completions.create(
-        model=cfg.llm_model,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": USER_TEMPLATE.format(
-                    context=context_md,
-                    start=last_scan.isoformat(),
-                    end=now.isoformat(),
-                    logs=logs_str,
-                ),
-            },
-        ],
-        response_format={"type": "json_object"},
-    )
+    start = last_scan.isoformat()
+    end = now.isoformat()
+
+    analyses = []
+    for i, chunk in enumerate(chunks):
+        logger.info(f"Analyzing chunk {i + 1}/{len(chunks)}")
+        analyses.append(await _call_llm(client, cfg, context_md, start, end, chunk))
 
     _set_last_scan(cfg.last_scan_file, now)
 
-    try:
-        return json.loads(resp.choices[0].message.content)
-    except json.JSONDecodeError:
-        return {"issues": [], "summary": "Failed to parse LLM response."}
+    return _merge_analyses(analyses)
 
 
 def _log_notif_history(path: str, issue: dict, sent: bool, timestamp: str):
