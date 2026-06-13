@@ -79,6 +79,21 @@ def _set_last_scan(path: str, dt: datetime):
     Path(path).write_text(dt.isoformat())
 
 
+def _cleanup_old_logs(log_dir: str, retention_seconds: int):
+    log_path = Path(log_dir)
+    if not log_path.exists():
+        return
+    cutoff = datetime.now(timezone.utc) - timedelta(seconds=retention_seconds)
+    for f in log_path.glob("*.jsonl"):
+        try:
+            mtime = datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
+        except OSError:
+            continue
+        if mtime < cutoff:
+            f.unlink()
+            logger.info(f"Deleted old log file: {f.name}")
+
+
 def _read_recent_logs(log_dir: str, since: datetime) -> list[str]:
     entries = []
     log_path = Path(log_dir)
@@ -257,6 +272,7 @@ async def _notify_issues(cfg: Config, analysis: dict):
 
 
 async def run_scan(cfg: Config) -> dict:
+    _cleanup_old_logs(cfg.log_dir, cfg.log_retention)
     analysis = await _analyze(cfg)
     await _notify_issues(cfg, analysis)
     return analysis
