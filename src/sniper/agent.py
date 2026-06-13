@@ -1,4 +1,5 @@
 import json
+import logging
 import threading
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -6,10 +7,15 @@ from pathlib import Path
 from fastmcp import FastMCP
 from fastmcp.server.lifespan import lifespan as _lifespan
 from openai import AsyncOpenAI
+import tiktoken
 
 from sniper.config import Config
 from sniper.context import load_context
 from sniper.notifier import SEVERITY_PRIORITY, send_gotify
+
+logger = logging.getLogger("sniper")
+
+MAX_CONTEXT_TOKENS = 150000
 
 mcp_ready = threading.Event()
 
@@ -100,6 +106,25 @@ def _read_recent_logs(log_dir: str, since: datetime) -> list[str]:
     return entries
 
 
+def _count_tokens(text: str, encoding_name: str = "cl100k_base") -> int:
+    enc = tiktoken.get_encoding(encoding_name)
+    return len(enc.encode(text))
+
+
+def _trim_logs_to_budget(lines: list[str], budget: int, encoding_name: str = "cl100k_base") -> str:
+    enc = tiktoken.get_encoding(encoding_name)
+    kept = []
+    remaining = budget
+    for line in reversed(lines):
+        toks = len(enc.encode(line))
+        if toks > remaining:
+            break
+        remaining -= toks
+        kept.append(line)
+    kept.reverse()
+    return "\n".join(kept)
+
+
 async def _analyze(cfg: Config) -> dict:
     last_scan = _get_last_scan(cfg.last_scan_file)
     now = datetime.now(timezone.utc)
@@ -110,6 +135,20 @@ async def _analyze(cfg: Config) -> dict:
         return {"issues": [], "summary": "No new log entries since last scan."}
 
     context_md = load_context(cfg.context_file)
+
+    system_tokens = _count_tokens(SYSTEM_PROMPT)
+    user_overhead = USER_TEMPLATE.format(
+        context=context_md,
+        start=last_scan.isoformat(),
+        end=now.isoformat(),
+        logs="",
+    )
+    overhead_tokens = system_tokens + _count_tokens(user_overhead)
+    logs_budget = max(0, MAX_CONTEXT_TOKENS - overhead_tokens)
+
+    logs_str = _trim_logs_to_budget(logs, logs_budget)
+    actual_tokens = system_tokens + _count_tokens(user_overhead) + _count_tokens(logs_str)
+    logger.info(f"Prompt tokens: {actual_tokens} (budget: {MAX_CONTEXT_TOKENS}, logs budget: {logs_budget})")
 
     client = AsyncOpenAI(base_url=cfg.llm_base_url, api_key=cfg.llm_api_key)
     resp = await client.chat.completions.create(
@@ -122,7 +161,7 @@ async def _analyze(cfg: Config) -> dict:
                     context=context_md,
                     start=last_scan.isoformat(),
                     end=now.isoformat(),
-                    logs="\n".join(logs[-2000:]),
+                    logs=logs_str,
                 ),
             },
         ],
